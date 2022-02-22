@@ -1,0 +1,65 @@
+TIMEZONE=$(timedatectl | sed -n 4p | cut -c 17-)
+OS=$(uname)
+ARCH=$(arch)
+DATE=$(date "+%d %B %Y %H:%M:%S")
+UPTIME=$(uptime | awk '{print $3}'| sed -e "s/.$//")
+UPTIMES=$(cat /proc/uptime | awk '{print $1}')
+IP=$(hostname -I | awk '{print $1}')
+NETMASK=$(netstat -r | sed -n 4p | awk '{print $3}')
+DEFGW=$(netstat -nr | sed -n 3p | awk '{print $2}')
+MEM=$(free -m | sed -n 2p | awk '{printf("%.3f Gb", $2*0.001)}')
+MEMU=$(free -m | sed -n 2p | awk '{printf("%.3f Gb", $3*0.001)}')
+MEMF=$(free -m | sed -n 2p | awk '{printf("%.3f Gb", $4*0.001)}')
+ROOTS=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$2*0.01)}')
+ROOTU=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$3*0.01)}')
+ROOTF=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$4*0.01)}')
+
+touch file.txt
+
+#!/bin/bash
+
+echo **HOSTNAME** = "**"$HOSTNAME"**" >> file.txt
+echo **HOSTNAME** = "**"$HOSTNAME"**"
+echo **TIMEZONE** = "**"$TIMEZONE"**" >> file.txt
+echo **TIMEZONE** = "**"$TIMEZONE"**" 
+echo **USER** = "**"$USER"**" >> file.txt
+echo **USER** = "**"$USER"**"
+echo **OS** = "**"$OS, $ARCH"**" >> file.txt
+echo **OS** = "**"$OS, $ARCH"**"
+echo **DATE** = "**"$DATE"**" >> file.txt
+echo **DATE** = "**"$DATE"**"
+echo **UPTIME** = "**"$UPTIME"**" >> file.txt
+echo **UPTIME** = "**"$UPTIME"**"
+echo **UPTIME_SEC** = "**"$UPTIMES"**" >> file.txt
+echo **UPTIME_SEC** = "**"$UPTIMES"**"
+echo **IP** = "**"$IP"**" >> file.txt
+echo **IP** = "**"$IP"**"
+echo **MASK** = "**""$NETMASK""**" >> file.txt
+echo **MASK** = "**""$NETMASK""**"
+echo **GATEWAY** = "**""$DEFGW""**" >> file.txt
+echo **GATEWAY** = "**""$DEFGW""**"
+echo **RAM_TOTAL** = "**""$MEM""**" >> file.txt
+echo **RAM_TOTAL** = "**""$MEM""**"
+echo **RAM_USED** = "**""$MEMU""**" >> file.txt
+echo **RAM_USED** = "**""$MEMU""**"
+echo **RAM_FREE** = "**""$MEMF""**" >> file.txt
+echo **RAM_FREE** = "**""$MEMF""**"
+echo **SPACE_ROOT** = "**""$ROOTS""**"
+echo **SPACE_ROOT** = "**""$ROOTS""**" >> file.txt
+echo **SPACE_ROOT_USED** = "**""$ROOTU""**"
+echo **SPACE_ROOT_USED** = "**""$ROOTU""**" >> file.txt
+echo **SPACE_ROOT_USED** = "**""$ROOTU""**"
+echo **SPACE_ROOT_FREE** = "**""$ROOTF""**" >> file.txt
+echo **SPACE_ROOT_FREE** = "**""$ROOTF""**"
+
+
+echo -n "Would you like to save it at file Y/N? -> "
+read Yes
+# if [[ "$Yes" =~ [0-9] ]]; then
+# echo "wrong input - text only"
+if [[ "$Yes" == "y" || "$Yes" == "Y" ]]; then
+    DATE2=$(date "+%d_%m_%Y_%H_%M_%S")
+    mv file.txt $DATE2.status
+else
+    rm file.txt
+fi
