@@ -7,131 +7,159 @@ declare -i sh
 declare -i fon
 declare -i shr
 
-par1=$(cat text | cut -b 20 | sed -n 1p)
-par2=$(cat text | cut -b 20 | sed -n 2p)
-par3=$(cat text | cut -b 20 | sed -n 3p)
-par4=$(cat text | cut -b 20 | sed -n 4p)
-
-white=1
-red=2
-green=3
-blue=4
-purple=5
-black=6
-
 f1=0
 f2=0
 f3=0
 f4=0
 
-((i=1))
-check_correct $par1 $par2 $par3 $par4
-check_prmtrs $par1 $i
+par1=$(cat text | cut -b 20 | sed -n 1p)
+check_prmtrs $par1
 fo=$?
-((i++))
-check_prmtrs $par2 $i
+
+par2=$(cat text | cut -b 20 | sed -n 2p)
+check_prmtrs $par2
 sh=$?
-((i++))
-check_prmtrs $par3 $i
+par3=$(cat text | cut -b 20 | sed -n 3p)
+check_prmtrs $par3
 fon=$?
-((i++))
-check_prmtrs $par4 $i
+par4=$(cat text | cut -b 20 | sed -n 4p)
+check_prmtrs $par4
 shr=$?
+
 check_default $fo
+if [[ $? -eq 8 ]]; then fo=0 var1="default" color1="black"
+else
+var1=$fo
+color1=$(check_color $fo)
+fi
+
 check_default $sh
+if [[ $? -eq 8 ]]; then sh=7 var2="default" color2="white"
+else
+var2=$sh
+color2=$(check_color $sh)
+fi
+
 check_default $fon
+if [[ $? -eq 8 ]]; then fon=1 var3="default" color3="red"
+else
+var3=$fon 
+color3=$(check_color $fon)
+fi
+
 check_default $shr
+if [[ $? -eq 8 ]]; then shr=4 var4="default" color4="blue"
+else
+var4=$shr
+color4=$(check_color $shr)
+fi
+
+change_colors $fo
+fo=$? 
+change_colors $sh
+sh=$?
+change_colors $fon
+fon=$?
+change_colors $shr
+shr=$?
+
+check_correct $fo $sh $fon $shr
 
 TIMEZONE=$(timedatectl | sed -n 4p | cut -c 17-)
-OS=$(uname)
-ARCH=$(arch)
 DATE=$(date "+%d %B %Y %H:%M:%S")
 UPTIME=$(uptime | awk '{print $3}'| sed -e "s/.$//")
-UPTIMES=$(cat /proc/uptime | awk '{print $1}')
+UPTIME_SEC=$(cat /proc/uptime | awk '{print $1}')
 IP=$(hostname -I | awk '{print $1}')
-NETMASK=$(netstat -r | sed -n 4p | awk '{print $3}')
-DEFGW=$(netstat -nr | sed -n 3p | awk '{print $2}')
-MEM=$(free -m | sed -n 2p | awk '{printf("%.3f Gb", $2*0.001)}')
-MEMU=$(free -m | sed -n 2p | awk '{printf("%.3f Gb", $3*0.001)}')
-MEMF=$(free -m | sed -n 2p | awk '{printf("%.3f Gb", $4*0.001)}')
-ROOTS=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$2*0.01)}')
-ROOTU=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$3*0.01)}')
-ROOTF=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$4*0.01)}')
+MASK=$(netstat -r | sed -n 4p | awk '{print $3}')
+GATEWAY=$(netstat -nr | sed -n 3p | awk '{print $2}')
+RAM_TOTAL=$(free -m | sed -n 2p | awk '{printf("%.3f Gb", $2*0.001)}')
+RAM_USED=$(free -m | sed -n 2p | awk '{printf("%.3f Gb", $3*0.001)}')
+RAM_FREE=$(free -m | sed -n 2p | awk '{printf("%.3f Gb", $4*0.001)}')
+SPACE_ROOT=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$2*0.01)}')
+SPACE_ROOT_USED=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$3*0.01)}')
+SPACE_ROOT_FREE=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$4*0.01)}')
 
 echo "$(tput setab $fo)$(tput setaf $sh)**HOSTNAME**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$HOSTNAME**$(tput sgr0)"
 echo "$(tput setab $fo)$(tput setaf $sh)**TIMEZONE**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$TIMEZONE**$(tput sgr0)"
 echo "$(tput setab $fo)$(tput setaf $sh)**USER**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$USER**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**OS ARCH**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$OS $ARCH**$(tput sgr0)"
+echo "$(tput setab $fo)$(tput setaf $sh)**OS**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$MACHTYPE**$(tput sgr0)"
 echo "$(tput setab $fo)$(tput setaf $sh)**DATE**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$DATE**$(tput sgr0)"
 echo "$(tput setab $fo)$(tput setaf $sh)**UPTIME**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$UPTIME**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**UPTIME_SEC**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$UPTIMES**$(tput sgr0)"
+echo "$(tput setab $fo)$(tput setaf $sh)**UPTIME_SEC**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$UPTIME_SEC**$(tput sgr0)"
 echo "$(tput setab $fo)$(tput setaf $sh)**IP**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$IP**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**MASK**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$NETMASK**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**GATEWAY**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$DEFGW**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**RAM_TOTAL**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$MEM**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**RAM_USED**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$MEMU**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**RAM_FREE**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$MEMF**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**SPACE_ROOT**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$ROOTS**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**SPACE_ROOT_USED**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$ROOTU**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**SPACE_ROOT_FREE**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$ROOTF**$(tput sgr0)"
+echo "$(tput setab $fo)$(tput setaf $sh)**MASK**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$MASK**$(tput sgr0)"
+echo "$(tput setab $fo)$(tput setaf $sh)**GATEWAY**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$GATEWAY**$(tput sgr0)"
+echo "$(tput setab $fo)$(tput setaf $sh)**RAM_TOTAL**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$RAM_TOTAL**$(tput sgr0)"
+echo "$(tput setab $fo)$(tput setaf $sh)**RAM_USED**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$RAM_USED**$(tput sgr0)"
+echo "$(tput setab $fo)$(tput setaf $sh)**RAM_FREE**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$RAM_FREE**$(tput sgr0)"
+echo "$(tput setab $fo)$(tput setaf $sh)**SPACE_ROOT**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$SPACE_ROOT**$(tput sgr0)"
+echo "$(tput setab $fo)$(tput setaf $sh)**SPACE_ROOT_USED**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$SPACE_ROOT_USED**$(tput sgr0)"
+echo "$(tput setab $fo)$(tput setaf $sh)**SPACE_ROOT_FREE**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$SPACE_ROOT_FREE**$(tput sgr0)"
 echo 
-echo "Column 1 background = $par1 (red)"
-echo "Column 1 font color = $par2 (blue)"
-echo "Column 2 background = $par3 (purple)"
-echo "Column 2 font color = $par4 (white)"
+echo "Column 1 background = $var1 ($color1)"
+echo "Column 1 font color = $var2 ($color2)"
+echo "Column 2 background = $var3 ($color3)"
+echo "Column 2 font color = $var4 ($color4)"
 }
 
-check_correct() {
-    if [[ "$1" == "$2" || "$3" == "$4" ]]; then
+check_correct(){
+    if [[ $1 == $2 || $3 == $4 ]]; then
     echo "Wrong colors, please restart and choose not similar"
     exit
-    elif ! [[ "$1" =~ [1-6] && "$2" =~ [1-6] && "$3" =~ [1-6] && "$4" =~ [1-6] ]]; then
-        if ! [ "$1" =~ [1-6] ]; then
-        f1 = 1
-        elif ! [ "$2" =~ [1-6] ]; then
-        f2 = 1
-        elif ! [ "$3" =~ [1-6] ]; then
-        f3 = 1
-        elif ! [ "$4" =~ [1-6] ]; then
-        f4 = 1
-        fi
     fi
+}
+
+change_colors(){
+    if [[ $1 -eq 1 ]]; then
+        flag=7;
+    elif [[ $1 -eq 2 ]]; then
+        flag=1;
+    elif [[ $1 -eq 3 ]]; then
+        flag=2;
+    elif [[ $1 -eq 4 ]]; then
+        flag=4;
+    elif [[ $1 -eq 5 ]]; then
+        flag=5;
+    elif [[ $1 -eq 6 ]]; then
+        flag=0;
+    else 
+        flag=$1
+    fi
+    return $flag;
 }
 
 check_prmtrs(){
-    if [[ $1 -eq white ]]; then
-        flag=7;
-    elif [[ $1 -eq red ]]; then
-        flag=1;
-    elif [[ $1 -eq green ]]; then
-        flag=2;
-    elif [[ $1 -eq blue ]]; then
-        flag=4;
-    elif [[ $1 -eq purple ]]; then
-        flag=5;
-    elif [[ $1 -eq black ]]; then
-        flag=0;
-    else
-        if [[ $2 -eq 1 ]]; then # Когда i = 1;
-            flag=-1
-        elif [[ $2 -eq 2 ]]; then
-            flag=-2
-        elif [[ $2 -eq 3 ]]; then
-            flag=-3 
-        elif [[ $2 -eq 4 ]]; then
-            flag=-4
-        fi
+    if ! [[ "$1" ]]; then
+        flag=8;
+    else 
+        flag=$1
     fi
-    return flag
+    return $flag
 }
 
 check_default(){
-    if [[ $1<0 ]]; then
-    flag=-1
+    if [[ $1>7 ]]; then
+    flag=8
     else
-    flag=0
+    flag=$1
     fi
-    return flag
+    return $flag
+}
+
+check_color(){
+    if [[ $1 -eq 1 ]]; then
+        echo "white"
+    elif [[ $1 -eq 2 ]]; then
+        echo "red"
+    elif [[ $1 -eq 3 ]]; then
+        echo "green"
+    elif [[ $1 -eq 4 ]]; then
+        echo "blue"
+    elif [[ $1 -eq 5 ]]; then
+        echo "purple"
+    elif [[ $1 -eq 6 ]]; then
+        echo "black"
+    fi
 }
 
 main
