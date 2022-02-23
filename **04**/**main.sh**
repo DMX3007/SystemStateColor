@@ -67,7 +67,7 @@ check_correct $fo $sh $fon $shr
 
 TIMEZONE=$(timedatectl | sed -n 4p | cut -c 17-)
 DATE=$(date "+%d %B %Y %H:%M:%S")
-UPTIME=$(uptime | awk '{print $3}'| sed -e "s/.$//")
+UPTIME=$(uptime | awk '{print $5}'| sed -e "s/.$//")
 UPTIME_SEC=$(cat /proc/uptime | awk '{print $1}')
 IP=$(hostname -I | awk '{print $1}')
 MASK=$(netstat -r | sed -n 4p | awk '{print $3}')
@@ -79,27 +79,34 @@ SPACE_ROOT=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$2*0.01)}
 SPACE_ROOT_USED=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$3*0.01)}')
 SPACE_ROOT_FREE=$(df --block-size=MB / | sed -n 2p | awk '{printf("%.2f MB",$4*0.01)}')
 
-echo "$(tput setab $fo)$(tput setaf $sh)**HOSTNAME**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$HOSTNAME**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**TIMEZONE**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$TIMEZONE**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**USER**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$USER**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**OS**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$MACHTYPE**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**DATE**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$DATE**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**UPTIME**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$UPTIME**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**UPTIME_SEC**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$UPTIME_SEC**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**IP**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$IP**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**MASK**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$MASK**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**GATEWAY**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$GATEWAY**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**RAM_TOTAL**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$RAM_TOTAL**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**RAM_USED**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$RAM_USED**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**RAM_FREE**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$RAM_FREE**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**SPACE_ROOT**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$SPACE_ROOT**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**SPACE_ROOT_USED**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$SPACE_ROOT_USED**$(tput sgr0)"
-echo "$(tput setab $fo)$(tput setaf $sh)**SPACE_ROOT_FREE**$(tput sgr 0) = $(tput setab $fon)$(tput setaf $shr)**$SPACE_ROOT_FREE**$(tput sgr0)"
+back1=`tput setab $fo`
+font1=`tput setaf $sh`
+back2=`tput setab $fon`
+font2=`tput setaf $shr`
+reset=`tput sgr0`
+
+for field in "HOSTNAME" "TIMEZONE" "USER" "OS" "DATE" "UPTIME" "UPTIME_SEC" "IP" "MASK" "GATEWAY" "RAM_TOTAL" "RAM_USED" "RAM_FREE" "SPACE_ROOT" "SPACE_ROOT_USED" "SPACE_ROOT_FREE"
+do
+((i++))
+echo -n "${back1}${font1}**$field**${reset}="
+    for field2 in "$HOSTNAME" "$TIMEZONE" "$USER" "$MACHTYPE" "$DATE" "$UPTIME" "$UPTIME_SEC" "$IP" "$MASK" "$GATEWAY" "$RAM_TOTAL" "$RAM_USED" "$RAM_FREE" "$SPACE_ROOT" "$SPACE_ROOT_USED" "$SPACE_ROOT_FREE"
+    do
+    ((c++))
+    if [ $c == $i ]; then
+    echo "${back2}${font2}**$field2**${reset}"
+    fi
+    if [[ $c -eq 16 ]]; then 
+        c=0
+    fi
+    done
+done
+
 echo 
 echo "Column 1 background = $var1 ($color1)"
 echo "Column 1 font color = $var2 ($color2)"
 echo "Column 2 background = $var3 ($color3)"
 echo "Column 2 font color = $var4 ($color4)"
+
 }
 
 check_correct(){
