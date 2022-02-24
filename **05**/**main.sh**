@@ -1,0 +1,27 @@
+#!/bin/bash
+path=$1
+
+DIRS=$(find $path -type d | wc -l)
+TOP5=$(du -a -h $path | sort -n -r | head -n 5 | awk '{print $2,$1}'| nl)
+COMMON_COUNT=$(ls -a $path | wc -l)
+EX=$(find $path -type f -perm /a=x | wc -l)
+LOG=$(find $path -type f | grep -E '\.\log$'| wc -l)
+ARCHIVE=$(find $path -type f | grep -E '\.\zip$|\.\tar$|\.arj\$|\.\rar$|\.\cab$|\.lzh\$|\.\gz$|\.\shar$|\.cpio\$|\.bz2\$'| wc -l)
+SYM=$(find $path -type l| wc -l)
+TEMP=$(find $path -type f -printf '%s\t%f\n'| sort -rn | head -n 10| grep -E '\.\w$|\.*$')
+FIELD=$(echo "$TEMP" | wc -l)
+
+echo "Total number of folders (including all nested ones) = $DIRS"
+echo "TOP 5 folders of maximum size arranged in descending order (path and size):  "
+echo "$TOP5"
+echo "Total number of paths = $COMMON_COUNT"
+echo "Executable paths = $EX"
+echo "Log paths (with the extension .log) = $LOG"
+echo "Archive paths = $ARCHIVE"
+echo "Symbolic links = $SYM"
+for ((i=1; i<$FIELD+1; i++))
+do
+    READY=$(find $path -type f -printf '%s\t%f\n'| sort -rn | head -n 10 | sed -n $i'{p;q}' | awk '{ for(x=0; ($1>1024) && (x<4); x++) { $1/=1024; if ($1<=1024 && x==0) { printf "%s %d %s", $2, $1,"Kb"; exit; } else if ($1<=1024 && x==1) { printf "%s %d %s", $2, $1, "Mb"; exit } else if ($1<=1024 && x==2) { printf "%s %d %s", $2, $1, "Gb"; exit }}}')
+    EXE=$(echo "$TEMP" |sed 's_.*/__'| sed -n $i'{p;q}'|awk -F . '{if (NF == 1) print "empty_ext"; else print $NF }'|awk '{printf("%s\n",$1)}')
+    echo $i "$READY" "$EXE"
+done
